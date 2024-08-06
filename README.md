@@ -17,7 +17,7 @@ Fonte: [Formação Go](https://cursos.alura.com.br/formacao-go)
 ## Indices
 1. [As 25 palavras reservadas do Go](#01-as-25-palavras-reservadas-do-go)
 2. [Comandos de execução](#02-comandos-de-execução)
-
+3. [Convensões do Go](#03-convensões-do-go)
 
 ## 01. [As 25 palavras reservadas do Go](https://vinniciusgomes.dev/articles/as-25-palavras-reservadas-do-go)
 
@@ -268,5 +268,162 @@ O comando `go build nome_do_arquivo.go` é utilizado para compilar o código fon
 O comando `go run nome_do_arquivo.go` compila e executa o código fonte Go em uma única etapa. Ao contrário de `go build`, o `go run` não gera um arquivo executável no disco; em vez disso, ele compila o código em tempo real e executa o programa imediatamente. Esse comando é útil durante o desenvolvimento para testar rapidamente o código sem precisar gerar um executável separado.
 
 
+## 03. Convensões do Go
+
+1. **Variáveis declaradas**
+
+    Variáveis declaradas devem ser obrigatóriamente utilizadas, caso contrarário o haverá erro de compilação e execução do código. 
+
+2. **Ponto e vígula**
+
+    O uso do ponto e vírgula para indicar o término de expressões em Go é opcional, porém, é recomendado não utiliza-los. 
+
+3. **Valores padrões**
+
+    Por padrão, caso variáveis não sejam declaradas possuindo valores, o Go irá atribuir valores padrões para elas.
+
+4. **Inferência de tipos**
+
+    O Go consegue inferir os tipos das variáveis sem precisar declará-los, caso seja atribuido um valor a variável.
+    ```go
+    // var idade int = 27
+    var idade = 27
+    ```
+
+5. **Inferência de variável**
+
+    O Go consegue inferir uma variável sem precisar utilizar palavra reservada `var` antes do nome da variável. Basta alterar o sinal de atribuição `=` para `:=`
+
+    ```go
+    // var peso = 84
+    peso := 84
+    ```
+
+5. **Inferência de Tipo com o `Scan`**
+
+    Em Go, o compilador consegue inferir o tipo da variável na leitura de entrada, sem a necessidade de especificar explicitamente o tipo da variável a ser lida, desde que o tipo já tenha sido declarado anteriormente na declaração da variável. 
+
+    Exemplo:
+    ```go
+    var comando int
+    // Se já declaramos a variável `comando` como um inteiro, podemos usar `Scan` sem especificar o tipo novamente
+    // fmt.Scanf("%d", &comando)
+    fmt.Scan(&comando)
+    ```
+
+6. **Controle de Fluxo com `Switch`**
+
+    Em Go, não é necessário utilizar a palavra-chave `break` dentro dos blocos `case` para evitar a execução dos casos subsequentes. O Go automaticamente encerra a execução após o primeiro `case` correspondente, tornando o código mais limpo e intuitivo.
+
+    Exemplo:
+    ```go
+    switch comando {
+        case 1:
+            fmt.Println("Monitorando...")
+        case 2:
+            fmt.Println("Exibindo Logs...")
+        case 0:
+            fmt.Println("Saindo do Programa...")
+        default:
+            fmt.Println("Comando inválido! Escolha entre os valores 0, 1 ou 2 para acessar as opções do menu.")
+    }
+    ```
+
+7. **Parênteses Delimitadores**
+
+    Em Go, não é necessário utilizar parênteses para delimitar expressões em estruturas de controle como `if`, `for`, etc. O escopo da lógica é delimitado automaticamente pelas chaves `{}` que envolvem o bloco de código.
+
+    Exemplo:
+    ```go
+    if comando == 1 {
+        fmt.Println("Monitorando...")
+    } else if comando == 2 {
+        fmt.Println("Exibindo Logs...")
+    } else if comando == 0 {
+        fmt.Println("Saindo do Programa...")
+    } else {
+        fmt.Println("Comando inválido! Escolha entre os valores 0, 1 ou 2 para acessar as opções do menu.")
+    }
+    ```
+8. **Saídas com o `os.Exit`**
+
+    Em Go, a função `os.Exit` é usada para terminar a execução de um programa imediatamente. Ela aceita um argumento inteiro que é retornado ao sistema operacional como código de saída, onde `0` geralmente indica sucesso e qualquer outro valor indica uma falha ou encerramento anormal.
+
+    Exemplo:
+    ```go
+    switch comando {
+        case 1:
+            fmt.Println("Monitorando...")
+        case 2:
+            fmt.Println("Exibindo Logs...")
+        case 0:
+            fmt.Println("Saindo do Programa...")
+            os.Exit(0)  // Encerra o programa com sucesso
+        default:
+            fmt.Println("Comando inválido! Escolha entre os valores 0, 1 ou 2 para acessar as opções do menu.")
+            os.Exit(-1) // Encerra o programa indicando um erro
+    }
+    ```
+
+    No exemplo acima, `os.Exit(0)` é chamado para encerrar o programa normalmente quando o comando é `0`, enquanto `os.Exit(-1)` é usado para sinalizar um erro ao usuário em caso de comando inválido.
+
+9. **Funções com Múltiplos Retornos e Operador em Branco `_`**
+
+    Em Go, as funções podem retornar múltiplos valores. Isso é particularmente útil quando uma função precisa retornar um valor de sucesso e um valor de erro, ou outras combinações de resultados. Quando você não precisa de um dos valores retornados, o operador em branco (`_`) pode ser usado para ignorá-lo.
+
+    **Exemplo de Função com Retorno Composto:**
+    ```go
+    func dividir(numerador, denominador int) (int, error) {
+        if denominador == 0 {
+            return 0, fmt.Errorf("divisão por zero")
+        }
+        return numerador / denominador, nil
+    }
+
+    func main() {
+        resultado, err := dividir(10, 2)
+        if err != nil {
+            fmt.Println("Erro:", err)
+        } else {
+            fmt.Println("Resultado:", resultado)
+        }
+    }
+    ```
+
+    Neste exemplo, a função `dividir` retorna dois valores: o resultado da divisão e um valor de erro, que será `nil` se a operação for bem-sucedida.
+
+    **Exemplo de Função com Retorno Composto Usando o Operador em Branco:**
+    ```go
+    func dividir(numerador, denominador int) (int, error) {
+        if denominador == 0 {
+            return 0, fmt.Errorf("divisão por zero")
+        }
+        return numerador / denominador, nil
+    }
+
+    func main() {
+        resultado, _ := dividir(10, 2)  // Ignorando o valor de erro
+        fmt.Println("Resultado:", resultado)
+    }
+    ```
+
+    Neste segundo exemplo, usamos o operador em branco (`_`) para ignorar o valor de erro retornado pela função `dividir`, caso o usuário não queira lidar com possíveis erros.
+
+10. **Looping Infinito com `for` e Inexistência do `while`**
+
+    Em Go, não existe uma estrutura de loop `while`. Em vez disso, a linguagem utiliza o `for` para todos os tipos de loops, incluindo loops infinitos. Um loop infinito pode ser criado simplesmente omitindo todas as condições do `for`, fazendo com que ele execute indefinidamente até que seja explicitamente interrompido.
+
+    ```go
+    func main() {
+        for {
+            fmt.Println("Executando indefinidamente...")
+            // O loop pode ser interrompido com um break ou return
+        }
+    }
+    ```
+
+    No exemplo acima, o loop `for` não tem condições, portanto, ele continua a executar indefinidamente. Para sair desse loop, você pode usar uma instrução `break` ou `return` dentro do bloco de código.
+
+    Go adota essa abordagem simplificada para loops, substituindo a necessidade de um comando `while` separado.
 
 
