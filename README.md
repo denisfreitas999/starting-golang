@@ -426,4 +426,124 @@ O comando `go run nome_do_arquivo.go` compila e executa o código fonte Go em um
 
     Go adota essa abordagem simplificada para loops, substituindo a necessidade de um comando `while` separado.
 
+11. **Array vs. Slices**
 
+    Em Go, um **array** é uma estrutura de dados com um tamanho fixo, definido no momento da sua criação. Já o **slice** é uma abstração sobre o array, que permite ao desenvolvedor trabalhar com coleções de elementos de forma mais flexível, sem a necessidade de se preocupar com a capacidade subjacente.
+
+    Um slice não armazena diretamente os dados, mas sim uma referência a um array. A principal vantagem do slice é que ele pode crescer ou diminuir dinamicamente, o que o torna muito mais conveniente de usar do que arrays fixos.
+
+    **Exemplo de Uso de Slice:**
+    ```go
+    func exibeNomes() {
+        nomes := []string{"Douglas", "Daniel", "Bernardo"}
+        fmt.Println("O meu slice tem", len(nomes), "itens")
+        fmt.Println("O meu slice tem capacidade para", cap(nomes), "itens")
+
+        nomes = append(nomes, "Aparecida")
+        fmt.Println("O meu slice tem", len(nomes), "itens")
+        fmt.Println("O meu slice tem capacidade para", cap(nomes), "itens")
+    }
+    ```
+
+    Neste exemplo, o slice `nomes` é inicializado com três elementos. Ao usar a função `append` para adicionar um novo nome, o slice é automaticamente redimensionado para acomodar o novo item. O comprimento (`len`) indica o número de elementos atuais no slice, enquanto a capacidade (`cap`) indica o tamanho máximo que o slice pode ter antes de precisar realocar a memória.
+
+    Ao contrário dos arrays, os slices são muito mais flexíveis, permitindo ao desenvolvedor manipular coleções de dados sem precisar se preocupar manualmente com a alocação de memória ou o redimensionamento.
+
+12. **Tratamento de Erros**
+
+    Em Go, o tratamento de erros é feito de forma explícita, utilizando o valor de retorno das funções. A maioria das funções em Go retorna um valor adicional do tipo `error` para indicar se ocorreu algum problema durante a execução. É uma prática comum verificar imediatamente se ocorreu um erro e tratá-lo de maneira adequada.
+
+    ```go
+    func testaSite(site string) {
+        resp, err := http.Get(site)
+        
+        // Tratamento de Erro
+        if err != nil {
+            fmt.Println("Erro detectado:", err)
+            return  // Interrompe a execução da função em caso de erro
+        }
+
+        if resp.StatusCode == 200 {
+            fmt.Println("Site:", site, "foi carregado com sucesso!")
+        } else {
+            fmt.Println("Site:", site, "está com problemas. Status Code:", resp.StatusCode)
+        }
+    }
+    ```
+
+    Neste exemplo, a função `testaSite` faz uma requisição HTTP para o site fornecido e utiliza o padrão de tratamento de erros do Go. Se `http.Get` retornar um erro, ele é imediatamente tratado com uma mensagem informativa e a função é interrompida. Caso contrário, a função verifica o código de status da resposta (`StatusCode`) para determinar se o site foi carregado com sucesso ou se houve algum problema.
+
+    Esse método de tratamento de erros, onde os erros são verificados e tratados logo após a ocorrência, ajuda a manter o código Go simples, claro e seguro.
+
+13. **Leitura de Arquivos**
+
+    Em Go, a leitura de arquivos pode ser feita utilizando funções da biblioteca padrão como `os.Open` para abrir o arquivo e `bufio.NewReader` para ler o conteúdo linha por linha. É importante sempre tratar erros durante a manipulação de arquivos para evitar falhas inesperadas.
+
+    ```go
+    func lerSitesDoArquivo() []string {
+        var sites []string
+
+        arquivo, err := os.Open("sites.txt")
+        // Alternativamente, você pode usar: arquivo, err := os.ReadFile("sites.txt")
+
+        if err != nil {
+            fmt.Println("Erro detectado:", err)
+            return sites // Retorna o slice vazio em caso de erro
+        }
+
+        leitor := bufio.NewReader(arquivo)
+        
+        for {
+            linha, err := leitor.ReadString('\n')
+            linha = strings.TrimSpace(linha)
+            
+            sites = append(sites, linha)
+
+            if err == io.EOF {
+                break
+            }
+        }
+
+        arquivo.Close()
+
+        return sites
+    }
+    ```
+
+    Neste exemplo, a função `lerSitesDoArquivo` abre um arquivo chamado `sites.txt` e lê cada linha dele, armazenando os sites em um slice de strings. A leitura é feita utilizando `bufio.NewReader`, que permite ler o arquivo linha por linha até encontrar o final do arquivo (`io.EOF`). 
+
+    Caso ocorra algum erro ao abrir o arquivo, ele é imediatamente tratado com uma mensagem de erro, e a função retorna um slice vazio. No final, o arquivo é fechado com `arquivo.Close()` para liberar os recursos do sistema.
+
+    Essa abordagem é útil para processar arquivos grandes ou para quando se deseja manipular o conteúdo linha por linha.
+
+14. **Escrita em Arquivos**
+
+    Em Go, a escrita em arquivos pode ser realizada utilizando a função `os.OpenFile`, que permite abrir um arquivo com diferentes modos (leitura, escrita, criação, anexação, etc.). É importante sempre tratar possíveis erros ao abrir ou manipular arquivos e garantir que o arquivo seja fechado corretamente após a operação.
+
+    ```go
+    func registrarLog(site string, status bool) {
+        arquivo, err := os.OpenFile("logs.txt", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
+        if err != nil {    
+            fmt.Println("Erro detectado:", err)
+            return  // Encerra a função em caso de erro
+        }
+
+        // Escreve a data e hora atual, o site e o status online no arquivo
+        _, err = arquivo.WriteString(time.Now().Format("02/01/2006 15:04:05") + 
+                                     " | Site: " + site + 
+                                     " | Status Online: " + strconv.FormatBool(status) + "\n")
+
+        if err != nil {
+            fmt.Println("Erro ao escrever no arquivo:", err)
+        }
+
+        arquivo.Close()
+    }
+    ```
+
+    Neste exemplo, a função `registrarLog` abre ou cria um arquivo chamado `logs.txt` no modo de leitura e escrita (`os.O_RDWR`), criando o arquivo se ele não existir (`os.O_CREATE`) e adicionando o conteúdo no final do arquivo (`os.O_APPEND`). O texto a ser escrito inclui a data e hora atual, o nome do site e o status de disponibilidade (`true` ou `false`).
+
+    Se houver um erro ao abrir ou escrever no arquivo, o erro é tratado com uma mensagem informativa. Após a operação, o arquivo é fechado com `arquivo.Close()` para garantir que os dados sejam salvos corretamente e que os recursos do sistema sejam liberados.
+
+    Esse método é útil para registrar logs ou qualquer tipo de histórico de operações em arquivos de texto.
